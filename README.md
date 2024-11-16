@@ -9,6 +9,7 @@ Once the data is processed, go to the stage1 folder and run the following comman
 
 
 ## Stage1
+```
 python train.py\
     --output_dir=./saved_models \
     --model_type=bert \
@@ -29,11 +30,12 @@ python train.py\
     --max_grad_norm 1.0 \
     --evaluate_during_training \
     --seed 123456 2>&1| tee log.log
-
+```
 
 
 ## Stage2
 After the first step of training is complete, we can get the trained Mapper component. At this point, you can jump to stage2 and start the second stage of training with the start command below.
+```
 python run.py 
     --mode PromptCS \
     --prompt_encoder_type lstm \
@@ -47,31 +49,36 @@ python run.py
     --eval_batch_size 2 \
     --learning_rate 5e-5 \
     --stru_prompt 32 \
+```
 
 ## Evaluation
 
 ### BLEU and SentenceBERT
+```
     cd Stage2
     python evaluate.py --predict_file_path ./saved_models/test_0.output --ground_truth_file_path ./saved_models/test_0.gold --SentenceBERT_model_path ../all-MiniLM-L6-v2
+```
 
 ### METEOR and ROUGE-L
 To obtain METEOR and ROUGE-L, we need to activate the environment that contains python 2.7
-
-    conda activate py27
+```
+    conda activate your-env
     unzip evaluation
     cd evaluation
     python evaluate.py --predict_file_path ../PromptCS/saved_models/test_0.output --ground_truth_file_path ../PromptCS/saved_models/test_0.gold
-
+```
 Tip: The path should only contain English characters.
 
 ## Zero-Shot LLMs
+```
     cd zeroshot
     python manual.py --model_name_or_path ../bigcode/starcoderbase-3b --test_filename ../dataset/python/clean_test.jsonl
     python manual_gpt_3.5.py --test_filename ../dataset/python/clean_test.jsonl
-
+```
 ## Few-Shot LLMs
 We directly leverage the 5 python examples provided by Ahmed et al. in their GitHub [repository](https://github.com/toufiqueparag/few_shot_code_summarization/tree/main/Java), since we use the same experimental dataset (i.e., the CSN corpus).
-
+```
     cd fewshot
     python fewshot.py --model_name_or_path ../bigcode/starcoderbase-3b --test_filename ../dataset/python/clean_test.jsonl
     python fewshot_gpt_3.5.py --test_filename ../dataset/python/clean_test.jsonl
+```
