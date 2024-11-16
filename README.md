@@ -32,6 +32,7 @@ For more detailed information, please refer to the handling method at **[CodeXGL
 │   ├── bleu.py
 │   └── manual.py
 ├── README.md
+```
 
 ## Train
 Once the data is processed, go to the stage1 folder and run the following command to start the program and start training!
