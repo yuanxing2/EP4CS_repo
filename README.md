@@ -32,35 +32,12 @@ For more detailed information, please refer to the handling method at **[CodeXGL
 │   ├── bleu.py
 │   └── manual.py
 ├── README.md
-```
-- Stage1
-  - models
-  - train.py: Script for training models in Stage 1.
-  - utils
-- Stage2
-  - bleu.py
-  - evaluate.py: Script for evaluating the Stage 2 model.
-  - model.py
-  - run.py: Main script for running the model and evaluation tools.
-- zero_shot
-  - bleu.py
-  - manual.py
-- evaluation
-  - evaluate.py
-  - meteor
-  - rouge
-  - tokenizer
-- fewshot
-  - bleu.py
-  - fewshot.py
-  - train_py.txt
-- README.md
 
 ## Train
 Once the data is processed, go to the stage1 folder and run the following command to start the program and start training!
 
 
-## Stage1
+### Stage1
 ```
 python train.py\
     --output_dir=./saved_models \
@@ -85,7 +62,7 @@ python train.py\
 ```
 
 
-## Stage2
+### Stage2
 After the first step of training is complete, we can get the trained Mapper component. At this point, you can jump to stage2 and start the second stage of training with the start command below.
 ```
 python run.py 
