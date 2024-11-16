@@ -9,7 +9,30 @@ The dataset processing method follows the same approach as Cadex Gluthda TasetPr
 For more detailed information, please refer to the handling method at **[CodeXGLUE Code-to-Text](https://github.com/microsoft/CodeXGLUE/tree/main/Code-Text/code-to-text)**. 
 
 ## Directory Hierarchy
-
+```bash
+├── evaluation
+│   ├── evaluate.py          # main evaluation script
+│   ├── meteor
+│   ├── rouge
+│   └── tokenizer
+├── fewshot
+│   ├── bleu.py
+│   ├── fewshot.py
+│   └── train_py.txt
+├── Stage1
+│   ├── models
+│   ├── train.py             # training script for Stage 1
+│   └── utils
+├── Stage2
+│   ├── bleu.py
+│   ├── evaluate.py          # evaluation script for Stage 2
+│   ├── model.py
+│   └── run.py               # main script for running Stage 2
+├── zero_shot
+│   ├── bleu.py
+│   └── manual.py
+├── README.md
+```
 - Stage1
   - models
   - train.py: Script for training models in Stage 1.
