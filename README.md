@@ -68,6 +68,7 @@ After the first step of training is complete, we can get the trained Mapper comp
 ```
 python run.py 
     --mode Prompt \
+    --stru_prompt 64\
     --template [0,160] \
     --model_name_or_path Qwen/Qwen1.5-4B \
     --train_filename ../dataset/python/clean_train.jsonl \
