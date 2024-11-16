@@ -67,8 +67,7 @@ python train.py\
 After the first step of training is complete, we can get the trained Mapper component. At this point, you can jump to stage2 and start the second stage of training with the start command below.
 ```
 python run.py 
-    --mode PromptCS \
-    --prompt_encoder_type lstm \
+    --mode Prompt \
     --template [0,160] \
     --model_name_or_path Qwen/Qwen1.5-4B \
     --train_filename ../dataset/python/clean_train.jsonl \
