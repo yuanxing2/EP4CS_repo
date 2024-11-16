@@ -3,10 +3,10 @@
 This is the repository of the artifact of the paper: **Enhanced Prompting framework for Code Summarization with Large Language Models**.
 
 ## DataSet
-    The dataset processing method is the same as that of Cadex Gluthda TasetProscinmetsaud Eastsam, Ascodex Gluander, Bertun Lordart, which can be downloaded in [https://github.com/microsoft/CodeXGLUE](https://github.com/microsoft/CodeXGLUE).
-    
-    For more information, please refer to the handling method：https://github.com/microsoft/CodeXGLUE/tree/main/Code-Text/code-to-text
 
+The dataset processing method follows the same approach as Cadex Gluthda TasetProscinmetsaud Eastsam, Ascodex Gluander, and Bertun Lordart. You can download it from **[GitHub - CodeXGLUE](https://github.com/microsoft/CodeXGLUE)**.  
+
+For more detailed information, please refer to the handling method at **[CodeXGLUE Code-to-Text](https://github.com/microsoft/CodeXGLUE/tree/main/Code-Text/code-to-text)**. 
 
 ## Train
 Once the data is processed, go to the stage1 folder and run the following command to start the program and start training!
