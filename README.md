@@ -4,9 +4,13 @@ This is the repository of the artifact of the paper: **Enhanced Prompting framew
 
 ## DataSet
 
-The dataset processing method follows the same approach as Cadex Gluthda TasetProscinmetsaud Eastsam, Ascodex Gluander, and Bertun Lordart. You can download it from **[GitHub - CodeXGLUE](https://github.com/microsoft/CodeXGLUE)**.  
 
-For more detailed information, please refer to the handling method at **[CodeXGLUE Code-to-Text](https://github.com/microsoft/CodeXGLUE/tree/main/Code-Text/code-to-text)**. 
+### CodeXGLUE
+The dataset processing method follows the same approach as Cadex Gluthda TasetProscinmetsaud Eastsam, Ascodex Gluander, and Bertun Lordart. You can download it from **[GitHub - CodeXGLUE](https://github.com/microsoft/CodeXGLUE)**.  For more detailed information, please refer to the handling method at **[CodeXGLUE Code-to-Text](https://github.com/microsoft/CodeXGLUE/tree/main/Code-Text/code-to-text)**. 
+
+### ASAP
+
+The publicly available dataset was utilized for constructing the Enhanced knowledge collection mentioned in the paper, which can be downloaded from **[https://zenodo.org/records/10494170](https://zenodo.org/records/10494170)**  . The main files are Java_data.zip and Python_data.zip, while the original paper is accessible via **[Automatic Semantic Augmentation of Language Model Prompts (for Code Summarization)](https://dl.acm.org/doi/pdf/10.1145/3597503.3639183)** .  
 
 ## Directory Hierarchy
 ```bash
@@ -40,6 +44,7 @@ Once the data is processed, go to the stage1 folder and run the following comman
 
 ### Stage1
 ```bash
+cd $root_path$/Stage1
 python train.py\
     --output_dir=./saved_models \
     --model_type=bert \
@@ -66,6 +71,7 @@ python train.py\
 ### Stage2
 After the first step of training is complete, we can get the trained Mapper component. At this point, you can jump to stage2 and start the second stage of training with the start command below.
 ```bash
+cd $root_path$/Stage2
 python run.py 
     --mode Prompt \
     --stru_prompt 64\
@@ -85,30 +91,29 @@ python run.py
 
 ### BLEU and SentenceBERT
 ```bash
-    cd Stage2
-    python evaluate.py --predict_file_path ./saved_models/test_0.output --ground_truth_file_path ./saved_models/test_0.gold --SentenceBERT_model_path ../all-MiniLM-L6-v2
+cd $root_path$/Stage2
+python evaluate.py --predict_file_path ./saved_models/test_0.output --ground_truth_file_path ./saved_models/test_0.gold --SentenceBERT_model_path ../all-MiniLM-L6-v2
 ```
 
 ### METEOR and ROUGE-L
 To obtain METEOR and ROUGE-L, we need to activate the environment that contains python 2.7
 ```bash
-    conda activate your-env
-    unzip evaluation
-    cd evaluation
-    python evaluate.py --predict_file_path ../PromptCS/saved_models/test_0.output --ground_truth_file_path ../PromptCS/saved_models/test_0.gold
+conda activate your-env # python version==2.7
+cd $root_path$/evaluation
+python evaluate.py --predict_file_path ../PromptCS/saved_models/test_0.output --ground_truth_file_path ../PromptCS/saved_models/test_0.gold
 ```
 Tip: The path should only contain English characters.
 
 ## Zero-Shot LLMs
 ```bash
-    cd zeroshot
-    python manual.py --model_name_or_path ../bigcode/starcoderbase-3b --test_filename ../dataset/python/clean_test.jsonl
-    python manual_gpt_3.5.py --test_filename ../dataset/python/clean_test.jsonl
+cd $root_path$/zero_shot
+python manual.py --model_name_or_path ../bigcode/starcoderbase-3b --test_filename ../dataset/python/clean_test.jsonl
+python manual_gpt_3.5.py --test_filename ../dataset/python/clean_test.jsonl
 ```
 ## Few-Shot LLMs
 We directly leverage the 5 python examples provided by Ahmed et al. in their GitHub [repository](https://github.com/toufiqueparag/few_shot_code_summarization/tree/main/Java), since we use the same experimental dataset (i.e., the CSN corpus).
 ```bash
-    cd fewshot
-    python fewshot.py --model_name_or_path ../bigcode/starcoderbase-3b --test_filename ../dataset/python/clean_test.jsonl
-    python fewshot_gpt_3.5.py --test_filename ../dataset/python/clean_test.jsonl
+cd $root_path$/fewshot
+python fewshot.py --model_name_or_path ../bigcode/starcoderbase-3b --test_filename ../dataset/python/clean_test.jsonl
+python fewshot_gpt_3.5.py --test_filename ../dataset/python/clean_test.jsonl
 ```
