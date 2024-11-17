@@ -1,9 +1,8 @@
-# Enhanced Prompting framework for Code Summarization with Large Language Models
+# EP4CS: **E**nhanced **P**rompting framework **f**or **C**ode **S**ummarization with Large Language Models
 
 This is the repository of the artifact of the paper: **Enhanced Prompting framework for Code Summarization with Large Language Models**.
 
-## DataSet
-
+## The Dataset
 
 ### CodeXGLUE
 The dataset processing method follows the same approach as Cadex Gluthda TasetProscinmetsaud Eastsam, Ascodex Gluander, and Bertun Lordart. You can download it from **[GitHub - CodeXGLUE](https://github.com/microsoft/CodeXGLUE)**.  For more detailed information, please refer to the handling method at **[CodeXGLUE Code-to-Text](https://github.com/microsoft/CodeXGLUE/tree/main/Code-Text/code-to-text)**. 
