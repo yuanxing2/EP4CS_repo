@@ -34,12 +34,12 @@ The publicly available dataset was utilized for constructing the Enhanced knowle
 ├── zero_shot
 │   ├── bleu.py
 │   └── manual.py
+├── requirements.txt
 ├── README.md
 ```
 
 ## Train
-Once the data is processed, go to the stage1 folder and run the following command to start the program and start training!
-
+Once the data is processed, go to the $root_apth$ folder and run the following command to start the program and start training!
 
 ### Stage1
 ```bash
