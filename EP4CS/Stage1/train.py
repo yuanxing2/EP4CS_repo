@@ -99,7 +99,7 @@ class TextDataset(Dataset):
                 background_knowledge_path = args.background_knowledge_file + "background_knowledge.txt"
                 with open(background_knowledge_path, 'r') as fg:
                     background_knowledge = fg.read()
-                    background_knowledge = background_knowledge.split("####################################")
+                    background_knowledge = background_knowledge.split("##########")
                 background_knowledge = background_knowledge[:train_data_num]
                 for i in range(train_data_num):
                     line = f.readline()
@@ -110,7 +110,7 @@ class TextDataset(Dataset):
                 background_knowledge_path = args.background_knowledge_file + "background_knowledge_valid.txt"
                 with open(background_knowledge_path, 'r') as fg:
                     background_knowledge = fg.read()
-                    background_knowledge = background_knowledge.split("####################################")
+                    background_knowledge = background_knowledge.split("##########")
                 background_knowledge = background_knowledge[:train_data_num]
                 for i in range(other_data_num):
                     line = f.readline()
