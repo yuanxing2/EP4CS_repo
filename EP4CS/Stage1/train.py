@@ -57,7 +57,7 @@ class InputFeatures(object):
         self.code_bert=code_bert
         self.code_bert_attention_mask=code_bert_attention_mask
 
-def convert_examples_to_features(js ,tokenizer, bert_tokenizer,block_size, text_size):
+def convert_examples_to_features(js, background_knowledge,tokenizer, bert_tokenizer,block_size, text_size):
     #code
     if 'code_tokens' in js:
         code=' '.join(js['code_tokens'])
@@ -78,9 +78,8 @@ def convert_examples_to_features(js ,tokenizer, bert_tokenizer,block_size, text_
         return_tensors="pt",
     )
 
-    nl=' '.join(js['docstring_tokens']) + js["repo"] + js["path"]
     text_tokens = bert_tokenizer(
-        nl,
+        background_knowledge,
         padding="max_length",
         truncation=True,
         max_length=text_size,
@@ -93,21 +92,33 @@ class TextDataset(Dataset):
     def __init__(self, args, tokenizer, bert_tokenizer, file_path=None):
         self.examples = []
         data=[]
+        train_data_num = 250
+        other_data_num = 80
         with open(file_path) as f:
             if 'train' in file_path:
-                for i in range(250):
+                background_knowledge_path = args.background_knowledge_file + "background_knowledge.txt"
+                with open(background_knowledge_path, 'r') as fg:
+                    background_knowledge = fg.read()
+                    background_knowledge = background_knowledge.split("####################################")
+                background_knowledge = background_knowledge[:train_data_num]
+                for i in range(train_data_num):
                     line = f.readline()
                     line = line.strip()
                     js = json.loads(line)
                     data.append(js)
             else:
-                for i in range(80):
+                background_knowledge_path = args.background_knowledge_file + "background_knowledge_valid.txt"
+                with open(background_knowledge_path, 'r') as fg:
+                    background_knowledge = fg.read()
+                    background_knowledge = background_knowledge.split("####################################")
+                background_knowledge = background_knowledge[:train_data_num]
+                for i in range(other_data_num):
                     line = f.readline()
                     line = line.strip()
                     js = json.loads(line)
                     data.append(js)
-        for js in data:
-            self.examples.append(convert_examples_to_features(js,tokenizer,bert_tokenizer, args.block_size, args.text_size))                        
+        for i in range(len(data)):
+            self.examples.append(convert_examples_to_features(data[i], background_knowledge[i],tokenizer,bert_tokenizer, args.block_size, args.text_size))                        
     
     def __len__(self):
         return len(self.examples)
@@ -352,6 +363,8 @@ def main():
     parser.add_argument("--eval_data_file", default=None, type=str,
                         help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
     parser.add_argument("--test_data_file", default=None, type=str,
+                        help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
+    parser.add_argument("--background_knowledge_file", default="dataset/java", type=str,
                         help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
                     
     parser.add_argument("--model_type", default="bert", type=str,
