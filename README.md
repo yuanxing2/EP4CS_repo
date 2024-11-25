@@ -10,6 +10,14 @@ The dataset processing method follows the same approach as Cadex Gluthda TasetPr
 ### ASAP
 
 The publicly available dataset was utilized for constructing the Enhanced knowledge collection mentioned in the paper, which can be downloaded from **[https://zenodo.org/records/10494170](https://zenodo.org/records/10494170)**  . The main files are Java_data.zip and Python_data.zip, while the original paper is accessible via **[Automatic Semantic Augmentation of Language Model Prompts (for Code Summarization)](https://dl.acm.org/doi/pdf/10.1145/3597503.3639183)** .  
+How to use:
+    Step1：First, download file Java_data.zip、Python_data.zip from **[https://zenodo.org/records/10494170](https://zenodo.org/records/10494170)**,Put these two files under the data_process file.
+    Step2:
+        cd data_process
+        unzip Java_data.zip
+        unzip Python_data.zip
+        python process_data.py
+    When you're done, you'll have 4 files to use as background.
 
 ## Directory Hierarchy
 ```bash
@@ -34,6 +42,8 @@ The publicly available dataset was utilized for constructing the Enhanced knowle
 ├── zero_shot
 │   ├── bleu.py
 │   └── manual.py
+├── data_process
+│   └── process_data.py
 ├── requirements.txt
 ├── README.md
 ```
