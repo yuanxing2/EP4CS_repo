@@ -107,7 +107,7 @@ class TextDataset(Dataset):
                     js = json.loads(line)
                     data.append(js)
             else:
-                background_knowledge_path = args.background_knowledge_file + "background_knowledge_valid.txt"
+                background_knowledge_path = args.background_knowledge_file + "background_knowledge_test.txt"
                 with open(background_knowledge_path, 'r') as fg:
                     background_knowledge = fg.read()
                     background_knowledge = background_knowledge.split("##########")
