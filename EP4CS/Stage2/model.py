@@ -45,11 +45,11 @@ class Prompt(nn.Module):
         self.max_code_length = args.max_code_length
         self.lsm = nn.LogSoftmax(dim=-1)
         self.loss_fct = nn.CrossEntropyLoss(ignore_index=self.pad_token_id, reduction='sum')
-        self.unixcode_tokenizer = AutoTokenizer.from_pretrained("microsoft/unixcoder-base")
+        self.codebert_tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
         self.bert_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         self.bert_tokenizer.add_special_tokens({"bos_token": "[DEC]"})
-        self.unixcode_model = AutoModel.from_pretrained("microsoft/unixcoder-base").to(self.device)
-        self.unixcoder_pad_ids = self.unixcode_tokenizer.pad_token_id
+        self.codebert_model = AutoModel.from_pretrained("microsoft/codebert-base").to(self.device)
+        self.codebert_pad_ids = self.codebert_tokenizer.pad_token_id
 
         self.Qformer = torch.load("../stage1_model/Qformer_64_stage1_epoch0.pth")
         self.query_tokens = torch.load("../stage1_model/query_64_token_epoch0.pth")
@@ -62,13 +62,13 @@ class Prompt(nn.Module):
         self.fc1 = nn.Linear(256, self.args.stru_prompt)
         self.fc2 = nn.Linear(self.num_features,self.model.config.hidden_size)
     
-    def get_prompt(self, code_embed, unix_struct_info, unixcode_attention_mask):
+    def get_prompt(self, code_embed, unix_struct_info, codebert_attention_mask):
         query_tokens = self.query_tokens.expand(code_embed.shape[0], -1, -1).to(self.device)
         #print(query_tokens.grad)
         query_output = self.Qformer.bert(
             query_embeds=query_tokens,
             encoder_hidden_states=code_embed,
-            encoder_attention_mask=unixcode_attention_mask,
+            encoder_attention_mask=codebert_attention_mask,
             return_dict=True,
         )
 
@@ -118,12 +118,12 @@ class Prompt(nn.Module):
         queries_for_embedding[(queries == self.pseudo_token_id)] = self.unk_token_id
         raw_embeds = self.embeddings(queries_for_embedding)
 
-        unix_inputs = pad_sequence(unix_inputs, True, padding_value=self.unixcoder_pad_ids).long().to(self.device)
-        unixcode_attention_mask = unix_inputs != self.unixcoder_pad_ids
+        unix_inputs = pad_sequence(unix_inputs, True, padding_value=self.codebert_pad_ids).long().to(self.device)
+        codebert_attention_mask = unix_inputs != self.codebert_pad_ids
         
-        self.unixcode_model.eval()
+        self.codebert_model.eval()
         with torch.no_grad():
-            unix_output = self.unixcode_model(unix_inputs, unixcode_attention_mask)
+            unix_output = self.codebert_model(unix_inputs, codebert_attention_mask)
             unix_struct_info = unix_output.pooler_output
             unix_hidden_state = unix_output.last_hidden_state
         unix_hidden_state_emb_att = torch.ones(unix_hidden_state.size()[:-1], dtype=torch.long).to(self.device)
@@ -140,11 +140,11 @@ class Prompt(nn.Module):
         left = self.prompt_tokens * self.template[0] + self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(x_h)[:self.max_code_length]) + self.prompt_tokens * self.template[1]
 
         block_size = 256
-        code_tokens = self.unixcode_tokenizer.tokenize(x_h)[:block_size-2]
-        code_tokens = [self.unixcode_tokenizer.cls_token]+code_tokens+[self.unixcode_tokenizer.sep_token]
-        unix_input =  self.unixcode_tokenizer.convert_tokens_to_ids(code_tokens)
+        code_tokens = self.codebert_tokenizer.tokenize(x_h)[:block_size-2]
+        code_tokens = [self.codebert_tokenizer.cls_token]+code_tokens+[self.codebert_tokenizer.sep_token]
+        unix_input =  self.codebert_tokenizer.convert_tokens_to_ids(code_tokens)
         padding_length = block_size - len(unix_input)
-        unix_input += [self.unixcode_tokenizer.pad_token_id]*padding_length
+        unix_input += [self.codebert_tokenizer.pad_token_id]*padding_length
 
         if x_t is not None:
             right = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(x_t)[:self.max_target_length]) + self.eos_tokens
