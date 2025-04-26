@@ -11,7 +11,7 @@ import argparse
 import numpy as np
 from io import open
 from time import time
-from model import Prompt
+from model import PromptCS
 from tqdm import tqdm
 from torch.utils.data import DataLoader, Dataset, SequentialSampler, RandomSampler
 from transformers import (AdamW, get_linear_schedule_with_warmup)
@@ -50,6 +50,8 @@ def read_examples(filename, args):
     examples=[]
     with open(filename,encoding="utf-8") as f:
         for idx, line in enumerate(f):
+            if idx >= 1000:
+                break
             line=line.strip()
             js=json.loads(line)
             source = " ".join(js['code_tokens'])
@@ -66,7 +68,7 @@ def read_examples(filename, args):
     return examples
 
 
-class Dataset(Dataset):
+class PromptCSDataset(Dataset):
     def __init__(self, dataset_type, examples, args):
         super().__init__()
         self.args = args
@@ -93,7 +95,7 @@ def set_seed(seed=42):
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_name_or_path", default='../bigcode/starcoderbase-3b', type=str,
+    parser.add_argument("--model_name_or_path", default='../LLMs/codegen-350m', type=str,
                         help="Path to pre-trained model" )
     parser.add_argument("--output_dir", default='./saved_models', type=str,
                         help="The output directory where the model predictions and checkpoints will be written.")
@@ -103,32 +105,32 @@ def main():
                         help="Patience for early stop.")
     parser.add_argument("--reload", default=False, type=bool,
                         help="Whether to reload the previous model")
-    parser.add_argument("--mode", default='Prompt', type=str,
-                        choices=["Prompt", "finetune"],
+    parser.add_argument("--mode", default='PromptCS', type=str,
+                        choices=["PromptCS", "finetune"],
                         help="Operational mode.")
-    parser.add_argument("--template", type=str, default="[0, 160]",
-                        help="The total length of the cue, that is, the total length of the knowledge vector plus the structured cue vector.If the first value is not zero, the hint vector is spelled before the code, otherwise it is spelled after the code.")
+    parser.add_argument("--template", type=str, default="[0, 100]",
+                        help="The concatenation method of pseudo tokens and code snippet.")
     parser.add_argument("--prompt_encoder_type", default='lstm', type=str,
                         choices=["lstm", "transformer"],
                         help="Architecture of prompt encoder.")
-    parser.add_argument("--stru_prompt", default=64, type=int,
-                        help="Structure hint vector length.")
+    parser.add_argument("--stru_prompt", default=96, type=int,
+                        help="Batch size per GPU/CPU for training.")
     parser.add_argument("--train_batch_size", default=2, type=int,
                         help="Batch size per GPU/CPU for training.")
     parser.add_argument("--eval_batch_size", default=2, type=int,
                         help="Batch size per GPU/CPU for evaluation.")
     parser.add_argument("--train_data_size", default=-1, type=int,
                         help="Dataset to be used during training. If -1, take the entire train dataset. Otherwise, take subset.")
-    parser.add_argument("--num_train_epochs", default=50, type=int,
+    parser.add_argument("--num_train_epochs", default=10, type=int,
                         help="Total number of training epochs to perform.")
     parser.add_argument("--learning_rate", default=5e-5, type=float,
                         help="The initial learning rate for Adam.")
 
-    parser.add_argument("--train_filename", default='../dataset/python/clean_train.jsonl', type=str,
+    parser.add_argument("--train_filename", default='../dataset/java/clean_train.jsonl', type=str,
                         help="The train filename. Should contain the .jsonl files for this task.")
-    parser.add_argument("--dev_filename", default='../dataset/python/clean_valid.jsonl', type=str,
+    parser.add_argument("--dev_filename", default='../dataset/java/clean_valid.jsonl', type=str,
                         help="The dev filename. Should contain the .jsonl files for this task.")
-    parser.add_argument("--test_filename", default='../dataset/python/clean_test.jsonl', type=str,
+    parser.add_argument("--test_filename", default='../dataset/java/clean_test.jsonl', type=str,
                         help="The test filename. Should contain the .jsonl files for this task.")  
 
     parser.add_argument("--max_code_length", default=300, type=int,
@@ -137,9 +139,9 @@ def main():
     parser.add_argument("--max_target_length", default=30, type=int,
                         help="The maximum total target sequence length after tokenization. Sequences longer "
                              "than this will be truncated, sequences shorter will be padded.")
-    parser.add_argument("--do_train", default=True, type=bool,
+    parser.add_argument("--do_train", default=False, type=bool,
                         help="Whether to run training.")
-    parser.add_argument("--do_eval", default=True, type=bool,
+    parser.add_argument("--do_eval", default=False, type=bool,
                         help="Whether to run eval on the dev set during training.")
     parser.add_argument("--do_test", default=True, type=bool,
                         help="Whether to run testing on the test dataset.")
@@ -167,9 +169,9 @@ def main():
 
     logger.warning("device: %s, n_gpu: %s", device, args.n_gpu)
 
-    assert args.n_gpu == 1, ("This version of Prompt can only run on a single GPU \n"
+    assert args.n_gpu == 1, ("This version of PromptCS can only run on a single GPU \n"
                              "Please set the GPU you want to use and run again. For example: CUDA_VISIBLE_DEVICES=0 python run.py \n"
-                             "If you need multi-GPU training, please check out the DeepSpeed version of Prompt")
+                             "If you need multi-GPU training, please check out the DeepSpeed version of PromptCS")
 
     logger.warning("model: %s, prompt_encoder: %s, len: %s, dataset: %s",
                    args.model_name_or_path, args.prompt_encoder_type, args.template, args.train_filename)
@@ -179,7 +181,7 @@ def main():
     set_seed(args.seed)
 
     #Build model
-    model=Prompt(args=args, device=device, template=args.template)
+    model=PromptCS(args=args, device=device, template=args.template)
 
     if args.reload:
         logger.info("reload model from {}".format(args.load_model_path))
@@ -193,18 +195,19 @@ def main():
         if args.train_data_size != -1:
             train_examples = random.sample(train_examples,min(args.train_data_size, len(train_examples)))
 
-        train_data = Dataset('train', train_examples, args)
+        train_data = PromptCSDataset('train', train_examples, args)
         train_sampler = RandomSampler(train_data)
         train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=args.train_batch_size)
 
         # Prepare optimizer and schedule (linear warmup and decay)
         t_total = len(train_dataloader) * args.num_train_epochs
         optimizer = AdamW(filter(lambda p: p.requires_grad,
-                                 model.parameters()), lr=args.learning_rate, weight_decay=0.0001, eps=1e-8)
+                                 model.parameters()), lr=args.learning_rate, weight_decay=0.001, eps=1e-8)
         scheduler = get_linear_schedule_with_warmup(optimizer,
                                                     num_warmup_steps=int(t_total*0.1),
                                                     num_training_steps=t_total)
-    
+        # scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma = 0.8)
+
         #Start training
         logger.info("***** Running training *****")
         logger.info("  Num examples = %d", len(train_examples))
@@ -237,7 +240,7 @@ def main():
                     optimizer.zero_grad()
                     scheduler.step()
                     global_step += 1
-
+            
             if args.do_eval:
                 checkpoint_end_time = time()
                 early_stopping_flag += 1
@@ -247,7 +250,7 @@ def main():
                 else:
                     eval_examples = read_examples(args.dev_filename, args)
                     eval_examples = random.sample(eval_examples,min(1000,len(eval_examples)))
-                    eval_data = Dataset('dev', eval_examples, args)
+                    eval_data = PromptCSDataset('dev', eval_examples, args)
                     dev_dataset['dev_bleu'] = eval_examples, eval_data
 
                 eval_sampler = SequentialSampler(eval_data)
@@ -265,7 +268,7 @@ def main():
                             all_out.append(pred)
                             if '.' in pred:
                                 pred = pred[:pred.index('.')]+' .'
-                            p.append(pred)
+                            p.append(pred)#p代表预测的结果
 
                 model.train()
 
@@ -315,7 +318,7 @@ def main():
 
 
     if args.do_test:
-        model = Prompt(args=args, device=device, template=args.template)
+        model = PromptCS(args=args, device=device, template=args.template)
 
         logger.info("reload model from {}".format(args.load_model_path))
         model.load_state_dict(torch.load(args.load_model_path))
@@ -328,7 +331,7 @@ def main():
         for idx,file in enumerate(files):   
             logger.info("Test file: {}".format(file))
             eval_examples = read_examples(file, args)
-            eval_data = Dataset('test', eval_examples, args)
+            eval_data = PromptCSDataset('test', eval_examples, args)
 
             # Calculate bleu
             eval_sampler = SequentialSampler(eval_data)
@@ -369,6 +372,7 @@ def main():
 
             with open(os.path.join(args.output_dir, "time.info"), 'a', encoding='utf-8') as f:
                 f.write("  Total Testing time: {} h {} m {} s, bleu: {} \n".format(hour, minute, second, dev_bleu))
+
 
 if __name__ == "__main__":
     main()
