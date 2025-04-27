@@ -38,6 +38,8 @@ How to use:
 │   ├── bleu.py
 │   ├── evaluate.py          # evaluation script for Stage 2
 │   ├── model.py
+│   ├── Qformer.py
+│   ├── VAE.py
 │   └── run.py               # main script for running Stage 2
 ├── zero_shot
 │   ├── bleu.py
@@ -84,8 +86,8 @@ cd $root_path$/Stage2
 python run.py 
     --mode Prompt \
     --stru_prompt 64\
-    --template [0,160] \
-    --model_name_or_path Qwen/Qwen1.5-4B \
+    --template [0,160] \#It is equal to the sum of the length of the knowledge vector and the structure vector
+    --model_name_or_path bigcode/starcoderbase-1b \
     --train_filename ../dataset/python/clean_train.jsonl \
     --dev_filename ../dataset/python/clean_valid.jsonl \
     --test_filename ../dataset/python/clean_test.jsonl \
@@ -93,7 +95,6 @@ python run.py
     --train_batch_size 2 \
     --eval_batch_size 2 \
     --learning_rate 5e-5 \
-    --stru_prompt 32 \
 ```
 
 ## Evaluation
