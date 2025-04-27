@@ -1,0 +1,21 @@
+
+python train.py\
+    --output_dir=./saved_models \
+    --model_type=bert \
+    --config_name=bert-base-uncased \
+    --model_name_or_path=bert-base-uncased \
+    --tokenizer_name=bert-base-uncased \
+    --do_train \
+    --do_eval \
+    --do_test \
+    --train_data_file=dataset/train.jsonl \
+    --eval_data_file=dataset/valid.jsonl \
+    --test_data_file=dataset/test.jsonl \
+    --epoch 10 \
+    --block_size 256 \
+    --train_batch_size 16 \
+    --eval_batch_size 16 \
+    --learning_rate 5e-5 \
+    --max_grad_norm 1.0 \
+    --evaluate_during_training \
+    --seed 123456 2>&1| tee log.log
