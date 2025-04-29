@@ -65,9 +65,9 @@ python train.py\
     --do_train \
     --do_eval \
     --do_test \
-    --train_data_file=dataset_new/train.jsonl \
-    --eval_data_file=dataset_new/valid.jsonl \
-    --test_data_file=dataset_new/test.jsonl \
+    --train_data_file=dataset/train.jsonl \
+    --eval_data_file=dataset/valid.jsonl \
+    --test_data_file=dataset/test.jsonl \
     --epoch 1 \
     --block_size 256 \
     --train_batch_size 16 \
