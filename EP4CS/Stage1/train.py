@@ -354,7 +354,7 @@ def main():
     parser = argparse.ArgumentParser()
 
     ## Required parameters
-    parser.add_argument("--train_data_file", default='dataset_new/train.jsonl', type=str, required=False,
+    parser.add_argument("--train_data_file", default='dataset/train.jsonl', type=str, required=False,
                          help="The input training data file (a text file).")
     parser.add_argument("--output_dir", default='output', type=str, required=True,
                          help="The output directory where the model predictions and checkpoints will be written.")
